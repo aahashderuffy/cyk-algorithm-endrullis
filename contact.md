@@ -21,6 +21,6 @@ p{
                 <p>
                 Aahash Kevin Sundararuban
                 <br>
-                <b>E-Mail</b>: Aahash.Sundararuban@campus.lmu.de
+                <b>E-Mail</b>: {{ site.email }}
                 </p>
 </div>
