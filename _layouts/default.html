@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="de">
+    
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{{ site.title }}</title>
+        <link rel="stylesheet" href="/assets/css/style.css"/>
+        <script> src="/assets/js/script.js"</script>
+    </head>
+    
+    <body>
+
+        <div class="navbar">
+            <a href="https://www.tcs.ifi.lmu.de/">LMU Theoretische Informatik Webseite</a>
+            <div class="dropdown">
+              <button class="menu">Menüauswahl</button>
+              <div class="dropdown-content">
+                <a href="/">Startseite</a>
+                <a href="/calculate/">Berechnen</a>
+                <a href="/theory/">Theorie und Beispiel</a>
+                <a href="/contact/">Kontakt</a>
+              </div>
+            </div>
+          </div>
+          
+          {{ page.content }}
+
+            <hr />
+
+            <footer>
+                Copyright &copy; 2024-present <a target="_blank" href="https://aahash.tk/">Aahash Sundararuban</a>
+            </footer>
+
+        </div>
+    </body> 
+</html>
