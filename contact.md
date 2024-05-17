@@ -1,6 +1,6 @@
 ---
 layout: default
-permalink: /bachelorarbeit-cyk/contact/
+permalink: /contact/
 ---
 
 <style>

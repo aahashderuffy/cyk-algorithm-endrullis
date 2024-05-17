@@ -1,6 +1,6 @@
 ---
 layout: default
-permalink: /bachelorarbeit-cyk/theory/
+permalink: /theory/
 ---
 
 <style>
