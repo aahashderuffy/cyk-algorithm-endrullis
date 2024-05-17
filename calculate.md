@@ -1,6 +1,6 @@
 ---
 layout: default
-permalink: /calculate/
+permalink: /bachelorarbeit-cyk/calculate/
 ---
 
 <div style="padding: 20px;">
