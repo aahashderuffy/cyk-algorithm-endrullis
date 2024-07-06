@@ -66,6 +66,19 @@ textarea {
 .solution {
     text-decoration: underline;
 }
+
+#cnf-status {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+#cnfButton.green {
+    background-color: green;
+}
+
+#cnfButton.red {
+    background-color: red;
+}
 </style>
 
 <div class="container">
@@ -78,6 +91,7 @@ B -> AB | b
     </textarea>
     <label for="word">Wort:</label>
     <textarea id="word">abbb</textarea>
+    <div id="cnf-status"></div>
     <div class="controls">
         <select id="modeSelect">
             <option value="">Modus auswählen</option>
@@ -87,6 +101,14 @@ B -> AB | b
         <button id="startButton" disabled>Starten</button>
         <button id="stepButton" disabled>Weiter</button>
         <button id="resetButton" disabled>Zurücksetzen</button>
+        <button id="solutionButton" disabled>Lösung zeigen</button>
+        <button id="cnfButton">Ist in Chomsky Normalform?</button>
+    </div>
+    <div id="userInputContainer" style="margin-top: 20px;">
+        <div id="currentQuestion"></div>
+        <input type="text" id="userAnswer" style="width: 100%; margin-top: 10px;" />
+        <button id="submitAnswerButton" disabled>Antworten</button>
+        <div id="userFeedback" class="feedback"></div>
     </div>
 </div>
 
@@ -104,6 +126,15 @@ B -> AB | b
         const startButton = document.getElementById('startButton');
         const stepButton = document.getElementById('stepButton');
         const resetButton = document.getElementById('resetButton');
+        const solutionButton = document.getElementById('solutionButton');
+        const submitAnswerButton = document.getElementById('submitAnswerButton');
+        const userAnswerInput = document.getElementById('userAnswer');
+        const currentQuestionDiv = document.getElementById('currentQuestion');
+        const cnfStatusDiv = document.getElementById('cnf-status');
+        const userFeedbackDiv = document.getElementById('userFeedback');
+        const feedbackDiv = document.getElementById('feedback');
+        const errorDiv = document.getElementById('error');
+        const cnfButton = document.getElementById('cnfButton');
 
         let currentStepIndex = 0;
         let steps = [];
@@ -122,24 +153,33 @@ B -> AB | b
         startButton.addEventListener('click', processCYK);
         stepButton.addEventListener('click', stepProcess);
         resetButton.addEventListener('click', resetProcess);
+        solutionButton.addEventListener('click', showSolution);
+        submitAnswerButton.addEventListener('click', submitUserAnswer);
+        cnfButton.addEventListener('click', checkCNF);
 
         function clearOutput() {
             document.getElementById('output').innerHTML = '';
             document.getElementById('feedback').innerHTML = '';
             document.getElementById('error').textContent = '';
+            cnfStatusDiv.textContent = '';
+            userAnswerInput.value = '';
+            currentQuestionDiv.textContent = '';
+            userFeedbackDiv.innerHTML = '';
+            cnfButton.classList.remove('green', 'red');
         }
 
         function processCYK() {
             const grammarInput = document.getElementById('grammar').value;
             wordInput = document.getElementById('word').value;
-            const errorDiv = document.getElementById('error');
 
             grammar = parseGrammar(grammarInput);
             if (!isCNF(grammar)) {
-                errorDiv.textContent = 'Die Grammatik ist nicht in Chomsky-Normalform.';
+                feedbackDiv.innerHTML = '<p class="incorrect">Nein, deine Grammatik liegt nicht in Chomsky-Normalform.</p>';
+                errorDiv.textContent = 'Fehler: Die eingegebene Grammatik liegt nicht in Chomsky-Normalform.';
                 clearOutput();
                 return;
             } else {
+                feedbackDiv.innerHTML = '<p class="correct">Ja, deine Grammatik liegt in Chomsky-Normalform.</p>';
                 errorDiv.textContent = '';
             }
 
@@ -154,6 +194,8 @@ B -> AB | b
             stepButton.disabled = false;
             resetButton.disabled = false;
             startButton.disabled = true;
+            submitAnswerButton.disabled = true;
+            solutionButton.disabled = false;
 
             if (mode === 'verify') {
                 displayOutput(wordInput, V, result.calculated);
@@ -168,20 +210,44 @@ B -> AB | b
             if (currentStepIndex < steps.length) {
                 const step = steps[currentStepIndex];
                 if (mode === 'guided') {
-                    const userAnswer = prompt(`Was ist der Wert von V<sub>${step.substring}</sub>?`);
-                    const correctAnswers = step.value.split(',').map(s => s.trim()).sort().join(', ');
-                    const correctAnswerVariants = generateCorrectAnswerVariants(step.value);
-
-                    if (correctAnswerVariants.includes(userAnswer.trim().split(',').map(s => s.trim()).sort().join(', '))) {
-                        alert('Deine Antwort ist richtig!');
-                        displayStep(step, true, userAnswer);
-                    } else {
-                        alert('Leider ist deine Antwort falsch.');
-                        displayStep(step, false, userAnswer);
-                    }
+                    currentQuestionDiv.innerHTML = `Was ist der Wert von V<sub>${step.substring}</sub>?`;
+                    submitAnswerButton.disabled = false;
+                    userAnswerInput.focus();
                 }
-                currentStepIndex++;
             }
+        }
+
+        function submitUserAnswer() {
+            const userAnswer = userAnswerInput.value.trim();
+            const step = steps[currentStepIndex];
+            const correctAnswers = step.value.split(',').map(s => s.trim()).sort().join(', ');
+            const correctAnswerVariants = generateCorrectAnswerVariants(step.value);
+
+            if (correctAnswerVariants.includes(userAnswer.split(',').map(s => s.trim()).sort().join(', '))) {
+                userFeedbackDiv.innerHTML = '<span class="correct">Deine Antwort ist richtig!</span>';
+                displayStep(step, true, userAnswer);
+                currentQuestionDiv.textContent = '';
+                userAnswerInput.value = '';
+                submitAnswerButton.disabled = true;
+                currentStepIndex++;
+                stepProcess();
+            } else {
+                userFeedbackDiv.innerHTML = '<span class="incorrect">Leider ist deine Antwort falsch.</span> Tipp: Überprüfen Sie die Produktionsregeln und die bisherigen Berechnungen.';
+                displayStep(step, false, userAnswer);
+                currentQuestionDiv.innerHTML = `Versuchen Sie es erneut: Was ist der Wert von V<sub>${step.substring}</sub>?`;
+                userAnswerInput.focus();
+            }
+        }
+
+        function showSolution() {
+            const step = steps[currentStepIndex];
+            userFeedbackDiv.innerHTML = `<span class="solution">Die richtige Antwort ist: ${step.value}</span>`;
+            displayStep(step, true, step.value);
+            currentQuestionDiv.textContent = '';
+            userAnswerInput.value = '';
+            submitAnswerButton.disabled = true;
+            currentStepIndex++;
+            stepProcess();
         }
 
         function resetProcess() {
@@ -196,6 +262,20 @@ B -> AB | b
             stepButton.disabled = true;
             resetButton.disabled = true;
             modeSelect.value = '';
+            solutionButton.disabled = true;
+            submitAnswerButton.disabled = true;
+        }
+
+        function checkCNF() {
+            const grammarInput = document.getElementById('grammar').value;
+            grammar = parseGrammar(grammarInput);
+            if (isCNF(grammar)) {
+                cnfButton.classList.add('green');
+                cnfButton.classList.remove('red');
+            } else {
+                cnfButton.classList.add('red');
+                cnfButton.classList.remove('green');
+            }
         }
 
         function parseGrammar(input) {
@@ -304,7 +384,7 @@ B -> AB | b
             calculated.forEach(substring => {
                 const i = word.indexOf(substring);
                 const l = substring.length - 1;
-                const result = `Für ${substring}: V = {${[...V[i][l]].join(',')}}`;
+                const result = `Für ${substring}: V = {${[...V[i][l]].join(', ')}}`;
                 const p = document.createElement('p');
                 p.innerHTML = result;
                 outputDiv.appendChild(p);
@@ -315,7 +395,7 @@ B -> AB | b
             const feedbackDiv = document.getElementById('feedback');
             const detailedSteps = steps.map(step => {
                 if (step.components) {
-                    return `V<sub>${step.substring}</sub> = { X | X -> ${step.components.join(' &cup; ')} = {${step.value}} }`;
+                    return `V<sub>${step.substring}</sub> = { X | X -> (${step.components.join(' ∪ ')}) = {${step.value}} }`;
                 } else {
                     return `V<sub>${step.substring}</sub> = { ${step.value} } da ${step.rule}`;
                 }
@@ -324,8 +404,8 @@ B -> AB | b
             feedbackDiv.innerHTML = `Ausführliche Rechenweg:<br>${detailedSteps.join('<br>')}`;
 
             const finalResult = V[0][word.length - 1].has('S') ?
-                `Das Wort "${word}" ist in der Sprache, weil S &isin; V<sub>${word}</sub>` :
-                `Das Wort "${word}" ist nicht in der Sprache, weil S &notin; V<sub>${word}</sub>`;
+                `Das Wort "${word}" ist in der Sprache, weil S ∈ V<sub>${word}</sub>` :
+                `Das Wort "${word}" ist nicht in der Sprache, weil S ∉ V<sub>${word}</sub>`;
 
             const conclusion = document.createElement('p');
             conclusion.innerHTML = finalResult;
@@ -342,7 +422,7 @@ B -> AB | b
             outputDiv.appendChild(p);
 
             const feedback = step.components ?
-                `V<sub>${step.substring}</sub> = { X | X -> ${step.components.join(' &cup; ')} = {${step.value}} }` :
+                `V<sub>${step.substring}</sub> = ({ X | X -> ${step.components.join(' ∪ ')}) = {${step.value}} }` :
                 `V<sub>${step.substring}</sub> = { ${step.value} } da ${step.rule}`;
             const f = document.createElement('p');
             f.innerHTML = `${feedback} (Ihre Eingabe: <span class="${isCorrect ? 'correct' : 'incorrect'}">${userAnswer}</span>)`;
