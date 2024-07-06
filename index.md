@@ -30,7 +30,7 @@ hi3 {
       Sie befinden sich auf der Startseite, auf der die wichtigsten Informationen zu finden sind und die auch als Orientierungshilfe für die Navigation auf der Website dient.
     <br>
     <br>
-    <hi2><b>LMU Theoretische Informatik Webseite</b>:</hi2> Sie werden auf die Hauptseite der Lehr- und Forschungseinheit für Theoretische Informatik und Theorembeweisen weitergeleitet.
+    <hi2><b><a href="https://www.tcs.ifi.lmu.de/">LMU Theoretische Informatik Webseite</a></b>:</hi2> Sie werden auf die Hauptseite der Lehr- und Forschungseinheit für Theoretische Informatik und Theorembeweisen weitergeleitet.
     <br>
     <br>
     <br>
