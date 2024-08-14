@@ -22,6 +22,15 @@ textarea {
     margin-bottom: 10px;
 }
 
+#userInputContainer {
+    margin-top: 20px;
+}
+
+#userAnswer {
+    width: 100%; 
+    margin-top: 10px;
+}
+
 .output {
     border: 1px solid #232323;
     overflow-y: auto;
@@ -38,16 +47,8 @@ textarea {
     height: 300px;
 }
 
-.error {
-    color: red;
-    font-weight: bold;
-}
-
-.controls {
+.control {
     margin-top: 10px;
-}
-
-.controls button {
     margin-right: 10px;
 }
 
@@ -56,28 +57,28 @@ textarea {
 }
 
 .correct {
-    color: green;
+    color: #00883A;
 }
 
 .incorrect {
-    color: red;
+    color: #D71919;
 }
 
 .solution {
     text-decoration: underline;
 }
 
-#cnf-status {
+#cnfStatus {
     margin-top: 10px;
     font-weight: bold;
 }
 
 #cnfButton.green {
-    background-color: green;
+    background-color: #90EE90;
 }
 
 #cnfButton.red {
-    background-color: red;
+    background-color: #D71919;
 }
 </style>
 
@@ -99,14 +100,13 @@ B -> AB | b
             <option value="guided">Geleitete Übung</option>
         </select>
         <button id="startButton" disabled>Starten</button>
-        <button id="stepButton" disabled>Weiter</button>
         <button id="resetButton" disabled>Zurücksetzen</button>
         <button id="solutionButton" disabled>Lösung zeigen</button>
         <button id="cnfButton">Ist in Chomsky Normalform?</button>
     </div>
     <div id="userInputContainer" style="margin-top: 20px;">
-        <div id="currentQuestion"></div>
-        <input type="text" id="userAnswer" style="width: 100%; margin-top: 10px;" />
+        <div id="question"></div>
+        <input type="text" id="userAnswer"/>
         <button id="submitAnswerButton" disabled>Antworten</button>
         <div id="userFeedback" class="feedback"></div>
     </div>
@@ -117,23 +117,20 @@ B -> AB | b
     <div id="output" class="output"></div>
     <h2>Feedback:</h2>
     <div id="feedback" class="feedback"></div>
-    <div id="error" class="error"></div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const modeSelect = document.getElementById('modeSelect');
         const startButton = document.getElementById('startButton');
-        const stepButton = document.getElementById('stepButton');
         const resetButton = document.getElementById('resetButton');
         const solutionButton = document.getElementById('solutionButton');
         const submitAnswerButton = document.getElementById('submitAnswerButton');
         const userAnswerInput = document.getElementById('userAnswer');
-        const currentQuestionDiv = document.getElementById('currentQuestion');
+        const questionDiv = document.getElementById('question');
         const cnfStatusDiv = document.getElementById('cnf-status');
         const userFeedbackDiv = document.getElementById('userFeedback');
         const feedbackDiv = document.getElementById('feedback');
-        const errorDiv = document.getElementById('error');
         const cnfButton = document.getElementById('cnfButton');
 
         let currentStepIndex = 0;
@@ -151,19 +148,17 @@ B -> AB | b
         });
 
         startButton.addEventListener('click', processCYK);
-        stepButton.addEventListener('click', stepProcess);
         resetButton.addEventListener('click', resetProcess);
-        solutionButton.addEventListener('click', showSolution);
+        solutionButton.addEventListener('click', displaySolution);
         submitAnswerButton.addEventListener('click', submitUserAnswer);
         cnfButton.addEventListener('click', checkCNF);
 
         function clearOutput() {
             document.getElementById('output').innerHTML = '';
             document.getElementById('feedback').innerHTML = '';
-            document.getElementById('error').textContent = '';
             cnfStatusDiv.textContent = '';
             userAnswerInput.value = '';
-            currentQuestionDiv.textContent = '';
+            questionDiv.textContent = '';
             userFeedbackDiv.innerHTML = '';
             cnfButton.classList.remove('green', 'red');
         }
@@ -173,15 +168,6 @@ B -> AB | b
             wordInput = document.getElementById('word').value;
 
             grammar = parseGrammar(grammarInput);
-            if (!isCNF(grammar)) {
-                feedbackDiv.innerHTML = '<p class="incorrect">Nein, deine Grammatik liegt nicht in Chomsky-Normalform.</p>';
-                errorDiv.textContent = 'Fehler: Die eingegebene Grammatik liegt nicht in Chomsky-Normalform.';
-                clearOutput();
-                return;
-            } else {
-                feedbackDiv.innerHTML = '<p class="correct">Ja, deine Grammatik liegt in Chomsky-Normalform.</p>';
-                errorDiv.textContent = '';
-            }
 
             const result = runCYK(wordInput, grammar);
             V = result.V;
@@ -191,7 +177,6 @@ B -> AB | b
 
             clearOutput();
 
-            stepButton.disabled = false;
             resetButton.disabled = false;
             startButton.disabled = true;
             submitAnswerButton.disabled = true;
@@ -200,7 +185,6 @@ B -> AB | b
             if (mode === 'verify') {
                 displayOutput(wordInput, V, result.calculated);
                 displayFeedback(steps, wordInput, V);
-                stepButton.disabled = true;
             } else if (mode === 'guided') {
                 stepProcess();
             }
@@ -210,7 +194,7 @@ B -> AB | b
             if (currentStepIndex < steps.length) {
                 const step = steps[currentStepIndex];
                 if (mode === 'guided') {
-                    currentQuestionDiv.innerHTML = `Was ist der Wert von V<sub>${step.substring}</sub>?`;
+                    questionDiv.innerHTML = `Was ist der Wert von V<sub>${step.substring}</sub>?`;
                     submitAnswerButton.disabled = false;
                     userAnswerInput.focus();
                 }
@@ -226,7 +210,7 @@ B -> AB | b
             if (correctAnswerVariants.includes(userAnswer.split(',').map(s => s.trim()).sort().join(', '))) {
                 userFeedbackDiv.innerHTML = '<span class="correct">Deine Antwort ist richtig!</span>';
                 displayStep(step, true, userAnswer);
-                currentQuestionDiv.textContent = '';
+                questionDiv.textContent = '';
                 userAnswerInput.value = '';
                 submitAnswerButton.disabled = true;
                 currentStepIndex++;
@@ -234,16 +218,16 @@ B -> AB | b
             } else {
                 userFeedbackDiv.innerHTML = '<span class="incorrect">Leider ist deine Antwort falsch.</span> Tipp: Überprüfen Sie die Produktionsregeln und die bisherigen Berechnungen.';
                 displayStep(step, false, userAnswer);
-                currentQuestionDiv.innerHTML = `Versuchen Sie es erneut: Was ist der Wert von V<sub>${step.substring}</sub>?`;
+                questionDiv.innerHTML = `Versuchen Sie es erneut: Was ist der Wert von V<sub>${step.substring}</sub>?`;
                 userAnswerInput.focus();
             }
         }
 
-        function showSolution() {
+        function displaySolution() {
             const step = steps[currentStepIndex];
             userFeedbackDiv.innerHTML = `<span class="solution">Die richtige Antwort ist: ${step.value}</span>`;
             displayStep(step, true, step.value);
-            currentQuestionDiv.textContent = '';
+            questionDiv.textContent = '';
             userAnswerInput.value = '';
             submitAnswerButton.disabled = true;
             currentStepIndex++;
@@ -259,7 +243,6 @@ B -> AB | b
             userSteps = [];
 
             startButton.disabled = true;
-            stepButton.disabled = true;
             resetButton.disabled = true;
             modeSelect.value = '';
             solutionButton.disabled = true;
