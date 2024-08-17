@@ -91,7 +91,7 @@ p{
     <br>
     <br>
     <zentriert>
-        <img title="Neuer CYK-Algorithm von Dr. Jörg Endrullis" height="600" alt="Bild zur neuen Berechnung mit dem neuen CYK-Algorithmus" src="/bachelorarbeit-cyk/assets/images/new cyk algorithm.png" />
+        <img title="Neuer CYK-Algorithm von Dr. Jörg Endrullis" height="600" alt="Bild zur neuen Berechnung mit dem neuen CYK-Algorithmus" src="/cyk-algorithm-endrullis/assets/images/new cyk algorithm.png" />
     </zentriert>
     <br>
     <p2>
@@ -220,7 +220,7 @@ p{
     <br />
     <br />
     <zentriert>
-        <img title="Standard-CYK-Algorithmus" height="600" alt="Bild zur Berechnung mit dem Standard-CYK-Algorithmus" src="/bachelorarbeit-cyk/assets/images/old cyk algorithm.png" />
+        <img title="Standard-CYK-Algorithmus" height="600" alt="Bild zur Berechnung mit dem Standard-CYK-Algorithmus" src="/cyk-algorithm-endrullis/assets/images/old cyk algorithm.png" />
         </zentriert>
     <p2>
         Bild 2: Berechnung mit dem alten CYK-Algorithmus

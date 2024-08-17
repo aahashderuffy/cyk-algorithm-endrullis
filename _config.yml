@@ -18,10 +18,10 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: CYK-Algorithmus
+title: CYK-Algorithmus von Endrullis
 email: Aahash.Sundararuban@campus.lmu.de
-description: "Hier wird das Thema Cocke-Younger-Kasami-Algorithmus behandelt."
-baseurl: "/bachelorarbeit-cyk" # the subpath of your site, e.g. /blog
+description: "Hier wird das Thema Cocke-Younger-Kasami-Algorithmus von Endrullis behandelt."
+baseurl: "/cyk-algorithm-endrullis" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
 # Exclude from processing.
