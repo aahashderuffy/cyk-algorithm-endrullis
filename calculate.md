@@ -204,20 +204,29 @@ B -> AB | b
         function submitUserAnswer() {
             const userAnswer = userAnswerInput.value.trim();
             const step = steps[currentStepIndex];
-            const correctAnswers = step.value.split(',').map(s => s.trim()).sort().join(', ');
             const correctAnswerVariants = generateCorrectAnswerVariants(step.value);
 
-            if (correctAnswerVariants.includes(userAnswer.split(',').map(s => s.trim()).sort().join(', '))) {
+            const userAnswerFormatted = userAnswer
+                .split(',')
+                .map(s => s.trim())
+                .sort()
+                .join(', ');
+
+            const isCorrect = correctAnswerVariants.some(variant => 
+                variant.includes(userAnswerFormatted) || 
+                userAnswerFormatted.includes(variant)
+            );
+
+            if (isCorrect) {
                 userFeedbackDiv.innerHTML = '<span class="correct">Deine Antwort ist richtig!</span>';
-                displayStep(step, true, userAnswer);
+                displayStep(step, true, userAnswerFormatted);
                 questionDiv.textContent = '';
                 userAnswerInput.value = '';
                 submitAnswerButton.disabled = true;
                 currentStepIndex++;
                 stepProcess();
             } else {
-                userFeedbackDiv.innerHTML = '<span class="incorrect">Leider ist deine Antwort falsch.</span> Tipp: Überprüfen Sie die Produktionsregeln und die bisherigen Berechnungen.';
-                displayStep(step, false, userAnswer);
+                userFeedbackDiv.innerHTML = '<span class="incorrect">Leider ist deine Antwort falsch.</span>';
                 questionDiv.innerHTML = `Versuchen Sie es erneut: Was ist der Wert von V<sub>${step.substring}</sub>?`;
                 userAnswerInput.focus();
             }
@@ -367,7 +376,7 @@ B -> AB | b
             calculated.forEach(substring => {
                 const i = word.indexOf(substring);
                 const l = substring.length - 1;
-                const result = `Für ${substring}: V = {${[...V[i][l]].join(', ')}}`;
+                const result = `V<sub>${substring}</sub> = {${[...V[i][l]].join(', ')}}`;
                 const p = document.createElement('p');
                 p.innerHTML = result;
                 outputDiv.appendChild(p);
@@ -399,17 +408,19 @@ B -> AB | b
             const outputDiv = document.getElementById('output');
             const feedbackDiv = document.getElementById('feedback');
 
-            const result = `Für ${step.substring}: V = {${step.value}}`;
-            const p = document.createElement('p');
-            p.innerHTML = result;
-            outputDiv.appendChild(p);
+            if (isCorrect) {
+                const result = `V<sub>${step.substring}</sub> = {${step.value}}`;
+                const p = document.createElement('p');
+                p.innerHTML = result;
+                outputDiv.appendChild(p);
 
-            const feedback = step.components ?
-                `V<sub>${step.substring}</sub> = ({ X | X -> ${step.components.join(' ∪ ')}) = {${step.value}} }` :
-                `V<sub>${step.substring}</sub> = { ${step.value} } da ${step.rule}`;
-            const f = document.createElement('p');
-            f.innerHTML = `${feedback} (Ihre Eingabe: <span class="${isCorrect ? 'correct' : 'incorrect'}">${userAnswer}</span>)`;
-            feedbackDiv.appendChild(f);
+                const feedback = step.components ?
+                    `V<sub>${step.substring}</sub> = ({ X | X -> ${step.components.join(' ∪ ')}) = {${step.value}} }` :
+                    `V<sub>${step.substring}</sub> = { ${step.value} } da ${step.rule}`;
+                const f = document.createElement('p');
+                f.innerHTML = `${feedback} (Ihre Eingabe: <span class="correct">${userAnswer}</span>)`;
+                feedbackDiv.appendChild(f);
+            }
         }
     });
 </script>
