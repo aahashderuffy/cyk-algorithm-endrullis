@@ -9,7 +9,13 @@ permalink: /calculate/
 
 <style>
 .container {
+    width: 30%; 
+    float: left;
+}
+
+.output-container{
     width: 50%; 
+    float: right;    
 }
 
 h2 {
@@ -20,6 +26,7 @@ textarea {
     width: 100%;
     height: 100px;
     margin-bottom: 10px;
+    resize: none;
 }
 
 #userInputContainer {
@@ -80,6 +87,23 @@ textarea {
 #cnfButton.red {
     background-color: #D71919;
 }
+
+#output {
+    margin: 20px;
+}
+
+#feedback {
+    margin: 20px;
+}
+
+#userInputContainer {
+    margin-top: 20px;
+}
+
+.controls {
+    margin-top: 10px;
+    margin-right: 10px;
+}
 </style>
 
 <div class="container">
@@ -112,7 +136,7 @@ B -> AB | b
     </div>
 </div>
 
-<div class="container">
+<div class="output-container">
     <h2>Ausgabe:</h2>
     <div id="output" class="output"></div>
     <h2>Feedback:</h2>
@@ -185,7 +209,17 @@ B -> AB | b
             if (mode === 'verify') {
                 displayOutput(wordInput, V, result.calculated);
                 displayFeedback(steps, wordInput, V);
+                if (isCNF(grammar)) {
+                    userFeedbackDiv.innerHTML = '<span class="correct">Ihre eingegebene Grammatik liegt in Chomsky-Normalform.</span>';
+                } else {
+                    userFeedbackDiv.innerHTML = '<span class="incorrect">Ihre eingegebene Grammatik liegt nicht in Chomsky-Normalform.</span>';
+            }
             } else if (mode === 'guided') {
+                if (isCNF(grammar)) {
+                    userFeedbackDiv.innerHTML = '<span class="correct">Ihre eingegebene Grammatik liegt in Chomsky-Normalform.</span>';
+                } else {
+                    userFeedbackDiv.innerHTML = '<span class="incorrect">Ihre eingegebene Grammatik liegt nicht in Chomsky-Normalform.</span>';
+                }
                 stepProcess();
             }
         }
@@ -226,7 +260,7 @@ B -> AB | b
                 currentStepIndex++;
                 stepProcess();
             } else {
-                userFeedbackDiv.innerHTML = '<span class="incorrect">Leider ist deine Antwort falsch.</span>';
+                userFeedbackDiv.innerHTML = '<span class="incorrect">Leider ist deine Antwort falsch.</span> Tipp: Überprüfen Sie die Produktionsregeln und die bisherigen Berechnungen.';
                 questionDiv.innerHTML = `Versuchen Sie es erneut: Was ist der Wert von V<sub>${step.substring}</sub>?`;
                 userAnswerInput.focus();
             }
@@ -387,7 +421,7 @@ B -> AB | b
             const feedbackDiv = document.getElementById('feedback');
             const detailedSteps = steps.map(step => {
                 if (step.components) {
-                    return `V<sub>${step.substring}</sub> = { X | X -> (${step.components.join(' ∪ ')}) = {${step.value}} }`;
+                    return `V<sub>${step.substring}</sub> = { X | X -> (${step.components.join()}) = {${step.value}} }`;
                 } else {
                     return `V<sub>${step.substring}</sub> = { ${step.value} } da ${step.rule}`;
                 }
@@ -415,7 +449,7 @@ B -> AB | b
                 outputDiv.appendChild(p);
 
                 const feedback = step.components ?
-                    `V<sub>${step.substring}</sub> = ({ X | X -> ${step.components.join(' ∪ ')}) = {${step.value}} }` :
+                    `V<sub>${step.substring}</sub> = ({ X | X -> ${step.components.join()}) = {${step.value}} }` :
                     `V<sub>${step.substring}</sub> = { ${step.value} } da ${step.rule}`;
                 const f = document.createElement('p');
                 f.innerHTML = `${feedback} (Ihre Eingabe: <span class="correct">${userAnswer}</span>)`;
