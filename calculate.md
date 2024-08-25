@@ -80,14 +80,6 @@ textarea {
     font-weight: bold;
 }
 
-#cnfButton.green {
-    background-color: #90EE90;
-}
-
-#cnfButton.red {
-    background-color: #D71919;
-}
-
 #output {
     margin: 20px;
 }
@@ -126,7 +118,6 @@ B -> AB | b
         <button id="startButton" disabled>Starten</button>
         <button id="resetButton" disabled>Zurücksetzen</button>
         <button id="solutionButton" disabled>Lösung zeigen</button>
-        <button id="cnfButton">Ist in Chomsky Normalform?</button>
     </div>
     <div id="userInputContainer" style="margin-top: 20px;">
         <div id="question"></div>
@@ -155,7 +146,6 @@ B -> AB | b
         const cnfStatusDiv = document.getElementById('cnf-status');
         const userFeedbackDiv = document.getElementById('userFeedback');
         const feedbackDiv = document.getElementById('feedback');
-        const cnfButton = document.getElementById('cnfButton');
 
         let currentStepIndex = 0;
         let steps = [];
@@ -175,7 +165,6 @@ B -> AB | b
         resetButton.addEventListener('click', resetProcess);
         solutionButton.addEventListener('click', displaySolution);
         submitAnswerButton.addEventListener('click', submitUserAnswer);
-        cnfButton.addEventListener('click', checkCNF);
 
         function clearOutput() {
             document.getElementById('output').innerHTML = '';
@@ -184,7 +173,6 @@ B -> AB | b
             userAnswerInput.value = '';
             questionDiv.textContent = '';
             userFeedbackDiv.innerHTML = '';
-            cnfButton.classList.remove('green', 'red');
         }
 
         function processCYK() {
@@ -295,13 +283,6 @@ B -> AB | b
         function checkCNF() {
             const grammarInput = document.getElementById('grammar').value;
             grammar = parseGrammar(grammarInput);
-            if (isCNF(grammar)) {
-                cnfButton.classList.add('green');
-                cnfButton.classList.remove('red');
-            } else {
-                cnfButton.classList.add('red');
-                cnfButton.classList.remove('green');
-            }
         }
 
         function parseGrammar(input) {
