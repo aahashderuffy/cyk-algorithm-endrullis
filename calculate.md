@@ -280,10 +280,6 @@ B -> AB | b
             submitAnswerButton.disabled = true;
         }
 
-        function checkCNF() {
-            const grammarInput = document.getElementById('grammar').value;
-            grammar = parseGrammar(grammarInput);
-        }
 
         function parseGrammar(input) {
             return input.trim().split('\n').reduce((grammar, rule) => {
@@ -334,24 +330,24 @@ B -> AB | b
         }
 
         function fillTable(V, word, grammar, steps, calculated) {
-            for (let l = 1; l < word.length; l++) {
-                for (let i = 0; i < word.length - l; i++) {
-                    for (let k = 0; k < l; k++) {
+            for (let j = 1; j < word.length; j++) {
+                for (let i = 0; i < word.length - j; i++) {
+                    for (let k = 0; k < j; k++) {
                         for (const [left, right] of Object.entries(grammar)) {
                             right.forEach(production => {
                                 if (production.length === 2) {
                                     const [B, C] = production;
-                                    if (V[i][k].has(B) && V[i + k + 1][l - k - 1].has(C)) {
-                                        V[i][l].add(left);
-                                        const substring = word.slice(i, i + l + 1);
+                                    if (V[i][k].has(B) && V[i + k + 1][j - k - 1].has(C)) {
+                                        V[i][j].add(left);
+                                        const substring = word.slice(i, i + j + 1);
                                         if (!calculated.has(substring)) {
                                             steps.push({
                                                 substring: substring,
-                                                value: [...V[i][l]].join(', '),
+                                                value: [...V[i][j]].join(', '),
                                                 rule: `${left} -> ${production}`,
                                                 components: [
                                                     `V<sub>${word.slice(i, i + k + 1)}</sub> = {${B}}`,
-                                                    `V<sub>${word.slice(i + k + 1, i + l + 1)}</sub> = {${C}}`
+                                                    `V<sub>${word.slice(i + k + 1, i + j + 1)}</sub> = {${C}}`
                                                 ]
                                             });
                                             calculated.add(substring);
@@ -390,8 +386,8 @@ B -> AB | b
             outputDiv.innerHTML = '';
             calculated.forEach(substring => {
                 const i = word.indexOf(substring);
-                const l = substring.length - 1;
-                const result = `V<sub>${substring}</sub> = {${[...V[i][l]].join(', ')}}`;
+                const j = substring.length - 1;
+                const result = `V<sub>${substring}</sub> = {${[...V[i][j]].join(', ')}}`;
                 const p = document.createElement('p');
                 p.innerHTML = result;
                 outputDiv.appendChild(p);
