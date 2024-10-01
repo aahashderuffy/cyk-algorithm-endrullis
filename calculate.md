@@ -201,16 +201,30 @@ B -> AB | b
                     userFeedbackDiv.innerHTML = '<span class="correct">Ihre eingegebene Grammatik liegt in Chomsky-Normalform.</span>';
                 } else {
                     userFeedbackDiv.innerHTML = '<span class="incorrect">Ihre eingegebene Grammatik liegt nicht in Chomsky-Normalform.</span>';
-            }
+                }
             } else if (mode === 'guided') {
                 if (isCNF(grammar)) {
                     userFeedbackDiv.innerHTML = '<span class="correct">Ihre eingegebene Grammatik liegt in Chomsky-Normalform.</span>';
                 } else {
                     userFeedbackDiv.innerHTML = '<span class="incorrect">Ihre eingegebene Grammatik liegt nicht in Chomsky-Normalform.</span>';
                 }
-                stepProcess();
+                askNewQuestion();
             }
         }
+
+        function askNewQuestion() {
+            if (currentStepIndex < steps.length) {
+                const step = steps[currentStepIndex];
+                questionDiv.innerHTML = `Was ist der Wert von V<sub>${step.substring}</sub>?`;
+                submitAnswerButton.disabled = false;
+                userAnswerInput.focus();
+            } else {
+                questionDiv.innerHTML = 'Geschafft! Alle Schritte wurden berechnet.';
+                submitAnswerButton.disabled = true;
+                displayOutput(wordInput, V, new Set(steps.map(s => s.substring)));
+            }
+        }
+
 
         function stepProcess() {
             if (currentStepIndex < steps.length) {
@@ -246,7 +260,9 @@ B -> AB | b
                 userAnswerInput.value = '';
                 submitAnswerButton.disabled = true;
                 currentStepIndex++;
-                stepProcess();
+                
+                displayOutput(wordInput, V, new Set(steps.slice(0, currentStepIndex).map(s => s.substring)));
+                askNewQuestion();
             } else {
                 userFeedbackDiv.innerHTML = '<span class="incorrect">Leider ist deine Antwort falsch.</span> Tipp: Überprüfen Sie die Produktionsregeln und die bisherigen Berechnungen.';
                 questionDiv.innerHTML = `Versuchen Sie es erneut: Was ist der Wert von V<sub>${step.substring}</sub>?`;
