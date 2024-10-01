@@ -398,7 +398,7 @@ B -> AB | b
             const feedbackDiv = document.getElementById('feedback');
             const detailedSteps = steps.map(step => {
                 if (step.components) {
-                    return `V<sub>${step.substring}</sub> = { X | X -> (${step.components.join()}) = {${step.value}} }`;
+                    return `V<sub>${step.substring}</sub> = { X | X -> (${step.components.join()})} = {${step.value}}`;
                 } else {
                     return `V<sub>${step.substring}</sub> = { ${step.value} } da ${step.rule}`;
                 }
@@ -426,7 +426,7 @@ B -> AB | b
                 outputDiv.appendChild(p);
 
                 const feedback = step.components ?
-                    `V<sub>${step.substring}</sub> = ({ X | X -> ${step.components.join()}) = {${step.value}} }` :
+                    `V<sub>${step.substring}</sub> = ({ X | X -> ${step.components.join()})} = {${step.value}}` :
                     `V<sub>${step.substring}</sub> = { ${step.value} } da ${step.rule}`;
                 const f = document.createElement('p');
                 f.innerHTML = `${feedback} (Ihre Eingabe: <span class="correct">${userAnswer}</span>)`;
