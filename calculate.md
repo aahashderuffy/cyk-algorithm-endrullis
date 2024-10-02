@@ -225,18 +225,6 @@ B -> AB | b
             }
         }
 
-
-        function stepProcess() {
-            if (currentStepIndex < steps.length) {
-                const step = steps[currentStepIndex];
-                if (mode === 'guided') {
-                    questionDiv.innerHTML = `Was ist der Wert von V<sub>${step.substring}</sub>?`;
-                    submitAnswerButton.disabled = false;
-                    userAnswerInput.focus();
-                }
-            }
-        }
-
         function submitUserAnswer() {
             const userAnswer = userAnswerInput.value.trim();
             const step = steps[currentStepIndex];
@@ -278,7 +266,7 @@ B -> AB | b
             userAnswerInput.value = '';
             submitAnswerButton.disabled = true;
             currentStepIndex++;
-            stepProcess();
+            askNewQuestion();
         }
 
         function resetProcess() {
