@@ -227,19 +227,24 @@ B -> AB | b
 
         function submitUserAnswer() {
             const userAnswer = userAnswerInput.value.trim();
-            const step = steps[currentStepIndex];
-            const correctAnswerVariants = generateCorrectAnswerVariants(step.value);
 
+            if (userAnswer === '') {
+                userFeedbackDiv.innerHTML = '<span class="incorrect">Ungültige Eingabe. Ihre Antwort darf nicht leer sein. Wenn Sie Schwierigkeiten haben, haben Sie die Möglichkeit, sich die Lösung sofort anzeigen zu lassen, indem Sie auf die Schaltfläche „Lösung anzeigen“ klicken.</span>';
+                userAnswerInput.focus();
+                return;
+            }
+
+            const step = steps[currentStepIndex];
+            const correctAnswers = generateCorrectAnswerVariants(step.value);
+
+            const correctAnswersSet = new Set(correctAnswers);
             const userAnswerFormatted = userAnswer
                 .split(',')
                 .map(s => s.trim())
                 .sort()
                 .join(', ');
 
-            const isCorrect = correctAnswerVariants.some(variant => 
-                variant.includes(userAnswerFormatted) || 
-                userAnswerFormatted.includes(variant)
-            );
+            const isCorrect = correctAnswersSet.has(userAnswerFormatted);
 
             if (isCorrect) {
                 userFeedbackDiv.innerHTML = '<span class="correct">Deine Antwort ist richtig!</span>';
@@ -248,8 +253,9 @@ B -> AB | b
                 userAnswerInput.value = '';
                 submitAnswerButton.disabled = true;
                 currentStepIndex++;
-                
+
                 displayOutput(wordInput, V, new Set(steps.slice(0, currentStepIndex).map(s => s.substring)));
+
                 askNewQuestion();
             } else {
                 userFeedbackDiv.innerHTML = '<span class="incorrect">Leider ist deine Antwort falsch.</span> Tipp: Überprüfen Sie die Produktionsregeln und die bisherigen Berechnungen.';
@@ -344,17 +350,21 @@ B -> AB | b
                                     if (V[i][k].has(B) && V[i + k + 1][j - k - 1].has(C)) {
                                         V[i][j].add(left);
                                         const substring = word.slice(i, i + j + 1);
+                                        const part1 = word.slice(i, i + k + 1);
+                                        const part2 = word.slice(i + k + 1, i + j + 1);
                                         if (!calculated.has(substring)) {
                                             steps.push({
                                                 substring: substring,
                                                 value: [...V[i][j]].join(', '),
                                                 rule: `${left} -> ${production}`,
-                                                components: [
-                                                    `V<sub>${word.slice(i, i + k + 1)}</sub> = {${B}}`,
-                                                    `V<sub>${word.slice(i + k + 1, i + j + 1)}</sub> = {${C}}`
-                                                ]
+                                                combination: `V<sub>${part1}</sub>V<sub>${part2}</sub> = {${B}${C}}`
                                             });
                                             calculated.add(substring);
+                                        } else {
+                                            const stepIndex = steps.findIndex(step => step.substring === substring);
+                                            if (stepIndex !== -1) {
+                                                steps[stepIndex].value = [...new Set(steps[stepIndex].value.split(', ').concat(left))].join(', ');
+                                            }
                                         }
                                     }
                                 }
@@ -400,15 +410,20 @@ B -> AB | b
 
         function displayFeedback(steps, word, V) {
             const feedbackDiv = document.getElementById('feedback');
-            const detailedSteps = steps.map(step => {
-                if (step.components) {
-                    return `V<sub>${step.substring}</sub> = { X | X -> (${step.components.join()})} = {${step.value}}`;
+            const detailedSteps = [];
+
+            steps.forEach(step => {
+                let combination = step.combination;
+                if (step.combination){
+                    let output = `V<sub>${step.substring}</sub> = { X | X -> ${combination}} = {${step.value}}`;
+                    detailedSteps.push(output);
                 } else {
-                    return `V<sub>${step.substring}</sub> = { ${step.value} } da ${step.rule}`;
+                    let output = `V<sub>${step.substring}</sub> = { ${step.value} } da ${step.rule}`;
+                    detailedSteps.push(output);
                 }
             });
 
-            feedbackDiv.innerHTML = `Ausführliche Rechenweg:<br>${detailedSteps.join('<br>')}`;
+            feedbackDiv.innerHTML = `Ausführlicher Rechenweg:<br>${detailedSteps.join('<br>')}`;
 
             const finalResult = V[0][word.length - 1].has('S') ?
                 `Das Wort "${word}" ist in der Sprache, weil S ∈ V<sub>${word}</sub>` :
@@ -422,21 +437,30 @@ B -> AB | b
         function displayStep(step, isCorrect, userAnswer) {
             const outputDiv = document.getElementById('output');
             const feedbackDiv = document.getElementById('feedback');
-
-            if (isCorrect) {
-                const result = `V<sub>${step.substring}</sub> = {${step.value}}`;
+            
+            const existingOutput = Array.from(outputDiv.children).map(p => p.innerHTML);
+            const stepResult = `V<sub>${step.substring}</sub> = {${step.value}}`;
+            
+            if (!existingOutput.includes(stepResult)) {
                 const p = document.createElement('p');
-                p.innerHTML = result;
+                p.innerHTML = stepResult;
                 outputDiv.appendChild(p);
+            }
 
-                const feedback = step.components ?
-                    `V<sub>${step.substring}</sub> = ({ X | X -> ${step.components.join()})} = {${step.value}}` :
-                    `V<sub>${step.substring}</sub> = { ${step.value} } da ${step.rule}`;
+            let feedback;
+            if (step.combination) {
+                feedback = `V<sub>${step.substring}</sub> = { X | X -> ${step.combination} = {${step.value}}`;
+            } else {
+                feedback = `V<sub>${step.substring}</sub> = { ${step.value} } da ${step.rule}`;
+            }
+            const existingFeedback = Array.from(feedbackDiv.children).map(f => f.innerHTML);
+            if (!existingFeedback.includes(feedback)) {
                 const f = document.createElement('p');
                 f.innerHTML = `${feedback} (Ihre Eingabe: <span class="correct">${userAnswer}</span>)`;
                 feedbackDiv.appendChild(f);
             }
         }
+
     });
 </script>
 
