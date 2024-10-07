@@ -415,7 +415,7 @@ B -> AB | b
             steps.forEach(step => {
                 let combination = step.combination;
                 if (step.combination){
-                    let output = `V<sub>${step.substring}</sub> = { X | X -> ${combination}} = {${step.value}}`;
+                    let output = `V<sub>${step.substring}</sub> = { X | X -> ${combination} } = {${step.value}}`;
                     detailedSteps.push(output);
                 } else {
                     let output = `V<sub>${step.substring}</sub> = { ${step.value} } da ${step.rule}`;
@@ -449,7 +449,7 @@ B -> AB | b
 
             let feedback;
             if (step.combination) {
-                feedback = `V<sub>${step.substring}</sub> = { X | X -> ${step.combination}} = {${step.value}}`;
+                feedback = `V<sub>${step.substring}</sub> = { X | X -> ${step.combination} } = {${step.value}}`;
             } else {
                 feedback = `V<sub>${step.substring}</sub> = { ${step.value} } da ${step.rule}`;
             }
