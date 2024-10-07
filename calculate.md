@@ -449,7 +449,7 @@ B -> AB | b
 
             let feedback;
             if (step.combination) {
-                feedback = `V<sub>${step.substring}</sub> = { X | X -> ${step.combination} = {${step.value}}`;
+                feedback = `V<sub>${step.substring}</sub> = { X | X -> ${step.combination}} = {${step.value}}`;
             } else {
                 feedback = `V<sub>${step.substring}</sub> = { ${step.value} } da ${step.rule}`;
             }
