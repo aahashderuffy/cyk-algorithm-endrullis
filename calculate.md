@@ -195,6 +195,7 @@ B -> AB | b
             solutionButton.disabled = false;
 
             if (mode === 'verify') {
+                solutionButton.disabled = true;
                 displayOutput(wordInput, V, result.calculated);
                 displayFeedback(steps, wordInput, V);
                 if (isCNF(grammar)) {
