@@ -237,6 +237,7 @@ B -> AB | b
             else {
                 questionDiv.innerHTML = 'Geschafft! Alle Schritte wurden berechnet.';
                 submitAnswerButton.disabled = true;
+                solutionButton.disabled = true;
                 displayOutput(wordInput, V, new Set(steps.map(s => s.substring)));
             }
         }
