@@ -98,6 +98,7 @@ textarea {
 }
 </style>
 
+<!--Eingabebereich -->
 <div class="container">
     <h2>Eingabe:</h2>
     <label for="grammar">Grammatik:</label>
@@ -119,6 +120,7 @@ B -> AB | b
         <button id="resetButton" disabled>Zurücksetzen</button>
         <button id="solutionButton" disabled>Lösung zeigen</button>
     </div>
+    <!--Quizbereich für den Modus "Geleitete Übung"-->
     <div id="userInputContainer" style="margin-top: 20px;">
         <div id="question"></div>
         <input type="text" id="userAnswer"/>
@@ -127,6 +129,7 @@ B -> AB | b
     </div>
 </div>
 
+<!--Ausgabebereich-->
 <div class="output-container">
     <h2>Ausgabe:</h2>
     <div id="output" class="output"></div>
@@ -135,6 +138,9 @@ B -> AB | b
 </div>
 
 <script>
+    /** Der Code wird nach dem vollständigen Laden des HTML-Dokuments ausgeführt. 
+      * Außerdem wird der Event-Listener beim Klicken von einem Button aktiviert.
+     **/
     document.addEventListener('DOMContentLoaded', function() {
         const modeSelect = document.getElementById('modeSelect');
         const startButton = document.getElementById('startButton');
@@ -147,25 +153,28 @@ B -> AB | b
         const userFeedbackDiv = document.getElementById('userFeedback');
         const feedbackDiv = document.getElementById('feedback');
 
-        let currentStepIndex = 0;
-        let steps = [];
-        let V = [];
-        let wordInput = '';
-        let grammar = {};
-        let mode = '';
-        let userSteps = [];
+        let currentStepIndex = 0;   // Es zeigt an, in welchem Rechenschritt sich der Nutzer im Modus "Geleitete Übung" befindet.
+        let steps = [];             // Es ist eine Liste der Berechnungsschritte, die den Ablauf des CYK-Algorithmus beschreiben.
+        let V = [];                 // Das aktuelle CYK-Tabellenarray mit den Zwischenergebnisse wird hier gespeichert.
+        let wordInput = '';         // Das eingegebene Wort wird analysiert.
+        let grammar = {};           // Die eingegebene Grammatik wird analysiert. 
+        let mode = '';              // Der Modus ("Überprüfen" oder "Geleitete Übung") wird ausgewählt
+        let userSteps = [];         // Es ist eine Liste, wo der Fortschritt vom Nutzer gespeichert wird. 
 
+        // Event-Listener für den Modusauswahl
         modeSelect.addEventListener('change', () => {
             mode = modeSelect.value;
             startButton.disabled = !mode;
-            clearOutput();
+            clearOutput(); 
         });
 
+        // Event-Listener für die Buttons
         startButton.addEventListener('click', processCYK);
         resetButton.addEventListener('click', resetProcess);
         solutionButton.addEventListener('click', displaySolution);
         submitAnswerButton.addEventListener('click', submitUserAnswer);
 
+        // Alle Ausgaben, sowohl im Ausgabebereich als auch im Feedbackbereich, werden gelöscht. 
         function clearOutput() {
             document.getElementById('output').innerHTML = '';
             document.getElementById('feedback').innerHTML = '';
@@ -175,6 +184,7 @@ B -> AB | b
             userFeedbackDiv.innerHTML = '';
         }
 
+        // CYK-Algorithmus wird verarbeitet.
         function processCYK() {
             const grammarInput = document.getElementById('grammar').value;
             wordInput = document.getElementById('word').value;
@@ -194,6 +204,7 @@ B -> AB | b
             submitAnswerButton.disabled = true;
             solutionButton.disabled = false;
 
+            // Im Modus "Überprüfen" werden Lösungen sofort im Ausgabebereich und im Feedbackbereich angezeigt.
             if (mode === 'verify') {
                 solutionButton.disabled = true;
                 displayOutput(wordInput, V, result.calculated);
@@ -203,7 +214,9 @@ B -> AB | b
                 } else {
                     userFeedbackDiv.innerHTML = '<span class="incorrect">Ihre eingegebene Grammatik liegt nicht in Chomsky-Normalform.</span>';
                 }
-            } else if (mode === 'guided') {
+            } 
+            // Im Modus "Geleitete Übung" wird die Lösung nach dem Beantworten einer Frage im Ausgabebereich und im Feedbackbereich angezeigt.
+            else if (mode === 'guided') {
                 if (isCNF(grammar)) {
                     userFeedbackDiv.innerHTML = '<span class="correct">Ihre eingegebene Grammatik liegt in Chomsky-Normalform.</span>';
                 } else {
@@ -213,19 +226,22 @@ B -> AB | b
             }
         }
 
+        // Neue Frage wird im Modus "Geleitete Übung" gestellt.
         function askNewQuestion() {
             if (currentStepIndex < steps.length) {
                 const step = steps[currentStepIndex];
                 questionDiv.innerHTML = `Was ist der Wert von V<sub>${step.substring}</sub>?`;
                 submitAnswerButton.disabled = false;
                 userAnswerInput.focus();
-            } else {
+            } 
+            else {
                 questionDiv.innerHTML = 'Geschafft! Alle Schritte wurden berechnet.';
                 submitAnswerButton.disabled = true;
                 displayOutput(wordInput, V, new Set(steps.map(s => s.substring)));
             }
         }
 
+        // Die Antwort vom Nutzer werden im Modus "Geleitete Übung" bearbeitet und überprüft.
         function submitUserAnswer() {
             const userAnswer = userAnswerInput.value.trim();
 
@@ -248,7 +264,7 @@ B -> AB | b
             const isCorrect = correctAnswersSet.has(userAnswerFormatted);
 
             if (isCorrect) {
-                userFeedbackDiv.innerHTML = '<span class="correct">Deine Antwort ist richtig!</span>';
+                userFeedbackDiv.innerHTML = '<span class="correct">Ihre Antwort ist richtig!</span>';
                 displayStep(step, true, userAnswerFormatted);
                 questionDiv.textContent = '';
                 userAnswerInput.value = '';
@@ -259,12 +275,13 @@ B -> AB | b
 
                 askNewQuestion();
             } else {
-                userFeedbackDiv.innerHTML = '<span class="incorrect">Leider ist deine Antwort falsch.</span> Tipp: Überprüfen Sie die Produktionsregeln und die bisherigen Berechnungen.';
+                userFeedbackDiv.innerHTML = '<span class="incorrect">Leider ist Ihre Antwort falsch.</span> Tipp: Überprüfen Sie die Produktionsregeln und die bisherigen Berechnungen.';
                 questionDiv.innerHTML = `Versuchen Sie es erneut: Was ist der Wert von V<sub>${step.substring}</sub>?`;
                 userAnswerInput.focus();
             }
         }
 
+        // Wenn der Nutzer im Modus "Geleitete Übung" auf dem Button "Lösung zeigen" klickt, dann wird die Lösung angezeigt.
         function displaySolution() {
             const step = steps[currentStepIndex];
             userFeedbackDiv.innerHTML = `<span class="solution">Die richtige Antwort ist: ${step.value}</span>`;
@@ -276,6 +293,7 @@ B -> AB | b
             askNewQuestion();
         }
 
+        // Alle Rechenschritte, Modusauswahl und Ausgaben werden zurückgesetzt.
         function resetProcess() {
             clearOutput();
 
@@ -291,7 +309,7 @@ B -> AB | b
             submitAnswerButton.disabled = true;
         }
 
-
+        // Die eingegebene Grammatik wird in einem strukturierten Objektformat geparst.
         function parseGrammar(input) {
             return input.trim().split('\n').reduce((grammar, rule) => {
                 const [left, right] = rule.split('->').map(part => part.trim());
@@ -305,6 +323,7 @@ B -> AB | b
             }, {});
         }
 
+        // Überprüfung, ob die eingegebene Grammatik die Regel der Chomsky Normalform (CNF) eingehalten wird. 
         function isCNF(grammar) {
             return Object.values(grammar).every(productions => 
                 productions.every(production => 
@@ -314,6 +333,7 @@ B -> AB | b
             );
         }
 
+        // CYK-Algorithmus wird implementiert. 
         function runCYK(word, grammar) {
             const n = word.length;
             const V = Array.from({ length: n }, () => Array.from({ length: n }, () => new Set()));
@@ -326,6 +346,7 @@ B -> AB | b
             return { V, steps, calculated };
         }
 
+        // Der CYK-Tabelle wird initialisiert.
         function initializeTable(V, word, grammar, steps, calculated) {
             for (let i = 0; i < word.length; i++) {
                 for (const [left, right] of Object.entries(grammar)) {
@@ -340,6 +361,7 @@ B -> AB | b
             }
         }
 
+        // Die CYK-Tabelle wird ausgefüllt.
         function fillTable(V, word, grammar, steps, calculated) {
             for (let j = 1; j < word.length; j++) {
                 for (let i = 0; i < word.length - j; i++) {
@@ -376,6 +398,7 @@ B -> AB | b
             }
         }
 
+        // Meherere Antworten werden akzeptiert und mehrere Varianten der richtigen Lösungen werden erstellt. 
         function generateCorrectAnswerVariants(answer) {
             const answers = answer.split(',').map(s => s.trim());
             const variants = new Set();
@@ -396,6 +419,7 @@ B -> AB | b
             return Array.from(variants);
         }
 
+        // Lösungen ohne detaillierte Rechenweg wird im Ausgabebereich angezeigt.
         function displayOutput(word, V, calculated) {
             const outputDiv = document.getElementById('output');
             outputDiv.innerHTML = '';
@@ -409,6 +433,7 @@ B -> AB | b
             });
         }
 
+        // Der detaillierte Rechenweg wird im Feedbackbereich angezeigt.
         function displayFeedback(steps, word, V) {
             const feedbackDiv = document.getElementById('feedback');
             const detailedSteps = [];
@@ -435,6 +460,7 @@ B -> AB | b
             feedbackDiv.appendChild(conclusion);
         }
 
+        // Ausgabe wird bei jede richtige Antwort angezeigt, wenn der Nutzer im Modus "Geleitete Übung" befindet. 
         function displayStep(step, isCorrect, userAnswer) {
             const outputDiv = document.getElementById('output');
             const feedbackDiv = document.getElementById('feedback');
